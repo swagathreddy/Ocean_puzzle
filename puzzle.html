@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Ocean Puzzle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Calibri, Arial, sans-serif;
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10+ */
+            user-select: none; /* Standard syntax */
+        }
+
+        body {
+            background-color: #a3e0e9;
+            height: 100%;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        /* Main container for responsive layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* Top Bar for Start Button and Title */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        h1 {
+            color: #1a365d;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+        }
+
+        .start-button-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .start-circle {
+            width: 50px;
+            height: 50px;
+            background-color: #3e8e41;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .start-text {
+            background-color: #4CAF50;
+            padding: 8px 15px;
+            color: white;
+            font-weight: bold;
+            margin-left: -15px;
+            border-radius: 0 5px 5px 0;
+        }
+
+        /* Main Layout using Flexbox for responsiveness */
+        .main-wrapper {
+            display: flex;
+            flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+            gap: 20px;
+            width: 100%;
+        }
+        
+        /* Game Area - contains latitudes and dashboard */
+        .game-area {
+            flex: 3; /* Takes up more space */
+            min-width: 300px; /* Minimum width before wrapping */
+            display: flex;
+        }
+
+        .latitude-column {
+            flex-basis: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding-right: 10px;
+            text-align: right;
+        }
+
+        .latitude-label {
+            color: #1a365d;
+            font-weight: bold;
+            font-size: clamp(8px, 2.5vw, 12px); /* Responsive font size */
+        }
+
+        .dashboard-area {
+            flex: 1; /* Takes remaining space in game-area */
+            width: 100%;
+        }
+
+        .dashboard {
+            width: 100%;
+            aspect-ratio: 700 / 474; /* Maintain aspect ratio */
+            background: url('https://zooreach.org/downloads/1ocean_platform/p1_puzzle/Dashboard.png') no-repeat center center;
+            background-size: contain;
+            border: 5px solid #f2d675;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        /* Hint Buttons */
+        .hint-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 5px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .hint-button {
+            background-color: #c8ffe3;
+            border: 1px solid #9be9c7;
+            padding: 8px;
+            cursor: pointer;
+            font-size: clamp(10px, 2vw, 14px);
+            font-weight: bold;
+        }
+
+        /* Side Info Panels and Controls */
+        .side-panel {
+            flex: 1; /* Takes up less space */
+            min-width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .info-panel { background-color: white; border-radius: 10px; padding: 8px; display: flex; }
+        .info-number { width: 25px; height: 25px; border-radius: 50%; background-color: #ff9090; color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 10px; flex-shrink: 0; }
+        .info-number.orange { background-color: #ffaa50; }
+        .info-content { font-size: 12px; line-height: 1.4; }
+
+        .control-buttons { display: flex; flex-direction: column; width: 100%; gap: 5px; margin-top: auto; }
+        .sound-btn, .reset-btn { padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; color: white; text-align: center; }
+        .sound-btn { background-color: #4a90e2; }
+        .reset-btn { background-color: #e74c3c; }
+
+        /* Pieces Container */
+        .pieces-container-wrapper {
+            width: 100%;
+            margin-top: 15px;
+            background-color: #f2d675;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            min-height: 60px;
+        }
+
+        .puzzle-piece {
+            position: relative;
+            width: 60px;
+            height: 45px;
+            cursor: grab;
+            touch-action: none;
+            transition: transform 0.2s; /* Smooth rotation */
+        }
+        .puzzle-piece.dragging { cursor: grabbing; }
+
+        .puzzle-piece img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* Pieces on the dashboard */
+        .dashboard .puzzle-piece {
+            position: absolute !important;
+            width: auto;
+            height: auto;
+            background: none !important;
+            cursor: pointer;
+            z-index: 5; /* Pieces are above dashboard, below lines */
+        }
+
+        .dashboard .puzzle-piece.dragging {
+             opacity: 0.8;
+             transform-origin: center center;
+             z-index: 1000; /* Dragged piece is on top of everything */
+        }
+        
+        .dashboard .puzzle-piece.snapped {
+             pointer-events: none; /* Lock piece in place */
+             z-index: 4; /* Snapped pieces go behind lines */
+        }
+
+        .correct-flash {
+            animation: flash-green 4s ease-out;
+        }
+        @keyframes flash-green {
+            0% { box-shadow: 0 0 25px 15px rgba(76, 175, 80, 0.7); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+        
+        .latitude-line {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            border-top: 2px dashed rgba(255, 255, 255, 0.6);
+            z-index: 10; /* Above pieces, below dragged piece */
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+        
+
+        .reference-image-container {
+            margin-top: 10px;
+        }
+        .reference-image-container img {
+            width: 100%;
+            border-radius: 5px;
+            border: 2px solid #f2d675;
+            cursor: pointer;
+        }
+        
+        /* References section */
+        .references-section { margin-top: 20px; width: 100%; text-align: center;}
+        .references-title { font-weight: bold; margin-bottom: 5px; }
+        .references-content { font-size: 12px; font-style: italic; text-align: left; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 20px 30px; border-radius: 15px; text-align: center; max-width: 90%; animation: modalAppear 0.3s ease-out; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        @keyframes modalAppear { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-content h2 { color: #2d4a8c; font-size: 28px; margin-bottom: 20px; }
+        .modal-content p { color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 25px; }
+        .modal-content button { background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease; }
+        .modal-content button:hover { background: #45a049; }
+
+        .hint-modal .modal-content, .ref-modal .modal-content { width: auto; max-width: 600px; }
+        .hint-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; text-align: center; }
+        .hint-body { font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+        .close-button { display: block; margin: 0 auto; padding: 8px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .ref-modal img { max-width: 100%; height: auto; }
+
+        /* =========== MOBILE-ONLY STYLES =========== */
+        @media (max-width: 850px) {
+            .main-wrapper { flex-direction: column; }
+            .side-panel { order: 1; width: 100%; flex-direction: column; }
+            .info-content { font-size: 11px; }
+            .control-buttons, .reference-image-container { margin-top: 10px; }
+            .game-area { order: 2; width: 100%; }
+            
+            /* --- FINAL & PRECISE LABEL ALIGNMENT --- */
+            .latitude-column {
+                flex-basis: 20%;
+                position: relative; 
+                justify-content: initial; /* Turn off auto-spacing */
+                padding: 0 5px 0 0;
+            }
+
+            .latitude-label {
+                position: absolute; 
+                width: 100%;
+                right: 5px;
+                font-size: 8px; 
+                line-height: 1.2;
+                transform: translateY(-50%); /* Center text vertically on the line */
+            }
+
+            /* Corrected vertical positions for each label */
+            .latitude-label:nth-child(1) { top: 12%; } /* Arctic Circle */
+            .latitude-label:nth-child(2) { top: 25%; } /* Tropic of Cancer */
+            .latitude-label:nth-child(3) { top: 36%; }    /* Equator */
+            .latitude-label:nth-child(4) { top: 48%; } /* Tropic of Capricorn */
+            .latitude-label:nth-child(5) { top: 62%; } /* Antarctic Circle */
+
+            .dashboard-area {
+                flex-basis: 80%; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="start-button-container" id="startButton">
+                <div class="start-circle">5</div>
+                <div class="start-text">Start</div>
+            </div>
+            <h1>One Ocean Puzzle</h1>
+        </div>
+
+        <div class="main-wrapper">
+            <div class="game-area">
+                <div class="latitude-column">
+                    <div class="latitude-label">ARCTIC CIRCLE</div>
+                    <div class="latitude-label">TROPIC OF CANCER</div>
+                    <div class="latitude-label">EQUATOR</div>
+                    <div class="latitude-label">TROPIC OF CAPRICORN</div>
+                    <div class="latitude-label">ANTARCTIC CIRCLE</div>
+                </div>
+                <div class="dashboard-area">
+                    <div class="dashboard" id="puzzleBoard">
+                        <div class="latitude-line tropic-cancer"></div>
+                        <div class="latitude-line tropic-capricorn"></div>
+                    </div>
+                    <div class="hint-buttons">
+                        <button class="hint-button" data-hint="1">HINT 1</button>
+                        <button class="hint-button" data-hint="2">HINT 2</button>
+                        <button class="hint-button" data-hint="3">HINT 3</button>
+                        <button class="hint-button" data-hint="4">HINT 4</button>
+                        <button class="hint-button" data-hint="5">HINT 5</button>
+                        <button class="hint-button" data-hint="6">HINT 6</button>
+                    </div>
+                </div>
+            </div>
+            <div class="side-panel">
+                <div class="info-panel">
+                    <div class="info-number">1</div>
+                    <div class="info-content">There are 12 pieces made of 5 oceans! Pacific (6), Atlantic (3), Indian (1), Antarctic (1), Arctic (1).</div>
+                </div>
+                <div class="info-panel">
+                    <div class="info-number">2</div>
+                    <div class="info-content">Use the clues on the pieces and in the hints to find their correct place.</div>
+                </div>
+                 <div class="info-panel">
+                    <div class="info-number orange">3</div>
+                    <div class="info-content"><b>Drag</b> pieces to the map. Once on the map, <b>tap a piece to rotate it</b>. Get it close to the right spot and it will snap into place!</div>
+                </div>
+                <div class="reference-image-container">
+                    <img src="Main.png"Reference Map" id="refImage">
+                </div>
+                <div class="control-buttons">
+                    <button class="sound-btn" id="soundToggle">Sound On</button>
+                    <button class="reset-btn" id="resetBtn">Reset Puzzle</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="pieces-container-wrapper" id="piecesContainer"></div>
+        
+        <div class="references-section">
+            <div class="references-title">REFERENCES:</div>
+            <div class="references-content">
+                1. Global Conveyor Belt: Broecker, W.S. (1991) | 2. Humpback Whale Migration: Rasmussen, K., et al. (2007) | 3. Arctic Tern Migration: Egevang, C., et al. (2010) | 4. Leatherback Turtle Migration: Bailey, H., et al. (2012) | 5. Ocean Temperature: Levitus, S., et al. (2012).
+            </div>
+        </div>
+        
+        <div class="modal completion-modal" id="completionModal">
+            <div class="modal-content">
+                <h2>Congratulations! 🎉</h2>
+                <p>You have successfully shown how all the oceans are connected!</p>
+                <button id="playAgainBtn">Play Again</button>
+            </div>
+        </div>
+        
+        <div class="modal hint-modal" id="hintModal">
+            <div class="modal-content">
+                <div class="hint-title" id="hintTitle"></div>
+                <div class="hint-body" id="hintBody"></div>
+                <button class="close-button">Close</button>
+            </div>
+        </div>
+        
+        <div class="modal ref-modal" id="refModal">
+            <div class="modal-content">
+                <img src="https://i.imgur.com/8a55427.png" alt="Full Reference Map">
+                <button class="close-button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const game = {
+        pieces: [
+             { id: "arctic", name: "Arctic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/ARCTIC.png", position: { x: 0.4, y: 0 }, size: { width: 99.1, height: 29.5 }, correctRotation: 0 },
+             { id: "northPacific", name: "North Pacific Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20PACIFIC.png", position: { x: 0, y: 16.2 }, size: { width: 16.8, height: 32.9 }, correctRotation: 0 },
+             { id: "northPacific2", name: "North Pacific Ocean 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20PACIFIC%202.png", position: { x: 78.0, y: 15.2 }, size: { width: 21.6, height: 24.9 }, correctRotation: 0 },
+             { id: "tropicalPacific1", name: "Tropical Pacific 1", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20PACIFIC%201.png", position: { x: 0, y: 35.2 }, size: { width: 27.0, height: 29.5 }, correctRotation: 0 },
+             { id: "tropicalPacific2", name: "Tropical Pacific 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20PACIFIC%202.png", position: { x: 73.1, y: 36.1 }, size: { width: 26.3, height: 26.0 }, correctRotation: 0 },
+             { id: "southPacific", name: "South Pacific Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20PACIFIC.png", position: { x: 0, y: 49.6 }, size: { width: 28.4, height: 34.2 }, correctRotation: 0 },
+             { id: "southPacific2", name: "South Pacific Ocean 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20PACIFIC%202.png", position: { x: 84.1, y: 60.3 }, size: { width: 15.4, height: 21.1 }, correctRotation: 0 },
+             { id: "northAtlantic", name: "North Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20ATLANTIC.png", position: { x: 25.6, y: 8.4 }, size: { width: 38.4, height: 33.1 }, correctRotation: 0 },
+             { id: "tropicalAtlantic", name: "Tropical Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20ATLANTIC.png", position: { x: 20.3, y: 32.7 }, size: { width: 31.1, height: 29.7 }, correctRotation: 0 },
+             { id: "southAtlantic", name: "South Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20ATLANTIC.png", position: { x: 27.4, y: 54.2 }, size: { width: 25.6, height: 24.9 }, correctRotation: 0 },
+             { id: "indianOcean", name: "Indian Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/INDIAN%20OCEAN.png", position: { x: 53.0, y: 35.0 }, size: { width: 32.1, height: 43.2 }, correctRotation: 0 },
+             { id: "southernOcean", name: "Southern Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTHERN%20OCEAN.png", position: { x: 0.4, y: 78.3 }, size: { width: 99.0, height: 21.5 }, correctRotation: 0 }
+        ],
+        hints: [
+            { title: "HINT 1", content: "The oceans are hottest at the equator (redder regions) and coolest near the poles (bluer regions). Match the puzzle piece colors to the dashboard background!" },
+            { title: "HINT 2", content: "The Global Conveyor Belt is a deep-sea current connecting all oceans. Red lines are warm currents and blue are cold. Connect the pieces to form the belt!" },
+            { title: "HINT 3", content: "Humpback whales migrate from polar feeding grounds (summer) to equatorial breeding grounds (winter). Follow the whale paths!" },
+            { title: "HINT 4", content: "Arctic Terns make the longest migration, from the Arctic to the Antarctic and back. Connect the pieces to show their epic journey!" },
+            { title: "HINT 5", content: "Leatherback turtles travel across the vast Pacific. Connect their paths, remembering the Pacific is on both sides of a 2D map!" },
+            { title: "HINT 6", content: "As you place the ocean pieces, the empty spaces will form the continents. Use your knowledge of world geography to guide you!" }
+        ],
+        soundEnabled: true,
+        currentRotations: {},
+        draggedPiece: null,
+        dragOffset: { x: 0, y: 0 },
+        isDragging: false,
+        sounds: {
+            correct: new Audio("https://assets.mixkit.co/sfx/preview/mixkit-game-success-tone-2867.mp3"),
+            snap: new Audio("https://assets.mixkit.co/sfx/preview/mixkit-short-put-down-2put-down-2-2059.mp3"),
+            rotate: new Audio("https://assets.mixkit.co/sfx/preview/mixkit-tick-in-a-game-interface-1087.mp3")
+        },
+
+        init() {
+            this.setupDOM();
+            this.createPieces();
+            this.setupEventListeners();
+            this.resetRotations();
+            Object.values(this.sounds).forEach(sound => sound.volume = 0.6);
+        },
+
+        setupDOM() {
+            this.elements = {
+                board: document.getElementById("puzzleBoard"),
+                piecesContainer: document.getElementById("piecesContainer"),
+                soundToggle: document.getElementById("soundToggle"),
+                resetBtn: document.getElementById("resetBtn"),
+                hintModal: document.getElementById('hintModal'),
+                hintTitle: document.getElementById('hintTitle'),
+                hintBody: document.getElementById('hintBody'),
+                completionModal: document.getElementById("completionModal"),
+                playAgainBtn: document.getElementById("playAgainBtn"),
+                refImage: document.getElementById("refImage"),
+                refModal: document.getElementById("refModal"),
+            };
+        },
+
+        createPieces() {
+            this.elements.piecesContainer.innerHTML = "";
+            this.pieces.forEach(piece => {
+                const div = document.createElement("div");
+                div.className = "puzzle-piece";
+                div.dataset.id = piece.id;
+                const img = document.createElement("img");
+                img.src = piece.image;
+                img.alt = piece.name;
+                div.appendChild(img);
+                this.elements.piecesContainer.appendChild(div);
+            });
+        },
+        
+        resetRotations() {
+            this.currentRotations = {};
+            this.pieces.forEach(p => this.currentRotations[p.id] = 0);
+        },
+
+        setupEventListeners() {
+            this.elements.soundToggle.addEventListener("click", () => this.toggleSound());
+            this.elements.resetBtn.addEventListener("click", () => this.resetPuzzle());
+            this.elements.playAgainBtn.addEventListener("click", () => this.resetPuzzle());
+            document.querySelectorAll('.hint-button').forEach(btn => btn.addEventListener('click', (e) => this.showHint(e)));
+            
+            document.querySelectorAll('.close-button').forEach(btn => btn.addEventListener('click', () => {
+                this.elements.hintModal.style.display = 'none';
+                this.elements.refModal.style.display = 'none';
+            }));
+
+            this.elements.refImage.addEventListener('click', () => {
+                this.elements.refModal.style.display = 'flex';
+            });
+            
+            document.addEventListener('mousedown', (e) => this.dragStart(e));
+            document.addEventListener('touchstart', (e) => this.dragStart(e));
+            document.addEventListener('mousemove', (e) => this.dragMove(e));
+            document.addEventListener('touchmove', (e) => this.dragMove(e), { passive: false });
+            document.addEventListener('mouseup', (e) => this.dragEnd(e));
+            document.addEventListener('touchend', (e) => this.dragEnd(e));
+            document.addEventListener('click', (e) => this.handleTap(e));
+        },
+
+        dragStart(e) {
+            const piece = e.target.closest('.puzzle-piece');
+            if (!piece || piece.classList.contains('snapped')) return;
+            
+            this.draggedPiece = piece;
+            this.isDragging = true;
+            this.draggedPiece.classList.add('dragging');
+
+            const boardRect = this.elements.board.getBoundingClientRect();
+            const eventPos = e.touches ? e.touches[0] : e;
+
+            if (!this.draggedPiece.parentElement.classList.contains('dashboard')) {
+                const pieceData = this.getPieceData(this.draggedPiece.dataset.id);
+                this.elements.board.appendChild(this.draggedPiece);
+                this.draggedPiece.style.width = `${pieceData.size.width}%`;
+                this.draggedPiece.style.height = `${pieceData.size.height}%`;
+                this.draggedPiece.style.left = `${(eventPos.clientX - boardRect.left) / boardRect.width * 100 - pieceData.size.width / 2}%`;
+                this.draggedPiece.style.top = `${(eventPos.clientY - boardRect.top) / boardRect.height * 100 - pieceData.size.height / 2}%`;
+            }
+            
+            const newPieceRect = this.draggedPiece.getBoundingClientRect();
+            this.dragOffset = {
+                x: eventPos.clientX - newPieceRect.left,
+                y: eventPos.clientY - newPieceRect.top
+            };
+        },
+
+        dragMove(e) {
+            if (!this.draggedPiece || !this.isDragging) return;
+            e.preventDefault();
+
+            const boardRect = this.elements.board.getBoundingClientRect();
+            const eventPos = e.touches ? e.touches[0] : e;
+            
+            this.draggedPiece.style.left = `${(eventPos.clientX - boardRect.left - this.dragOffset.x) / boardRect.width * 100}%`;
+            this.draggedPiece.style.top = `${(eventPos.clientY - boardRect.top - this.dragOffset.y) / boardRect.height * 100}%`;
+        },
+
+        dragEnd(e) {
+            if (!this.draggedPiece) return;
+
+            const boardRect = this.elements.board.getBoundingClientRect();
+            const eventPos = e.changedTouches ? e.changedTouches[0] : e;
+            
+            const isOutside = eventPos.clientX < boardRect.left || eventPos.clientX > boardRect.right ||
+                              eventPos.clientY < boardRect.top || eventPos.clientY > boardRect.bottom;
+            
+            if (isOutside) {
+                this.returnPieceToContainer(this.draggedPiece);
+            } else {
+                this.snapPiece(this.draggedPiece);
+            }
+            
+            this.draggedPiece.classList.remove('dragging');
+            this.draggedPiece = null;
+            setTimeout(() => { this.isDragging = false; }, 50);
+        },
+
+        returnPieceToContainer(piece) {
+            piece.style.cssText = ''; 
+            const pieceId = piece.dataset.id;
+            this.currentRotations[pieceId] = 0; 
+            this.elements.piecesContainer.appendChild(piece);
+        },
+
+        handleTap(e) {
+            if (this.isDragging) return;
+            const piece = e.target.closest('.puzzle-piece');
+            if (piece && piece.parentElement.classList.contains('dashboard') && !piece.classList.contains('snapped')) {
+                this.rotatePiece(piece);
+            }
+        },
+        
+        rotatePiece(piece) {
+            const pieceId = piece.dataset.id;
+            this.currentRotations[pieceId] = (this.currentRotations[pieceId] + 90) % 360;
+            piece.style.transform = `rotate(${this.currentRotations[pieceId]}deg)`;
+            if(this.soundEnabled) this.sounds.rotate.play();
+            this.snapPiece(piece);
+        },
+
+        snapPiece(piece) {
+            const pieceId = piece.dataset.id;
+            const pieceData = this.getPieceData(pieceId);
+            const currentX = parseFloat(piece.style.left);
+            const currentY = parseFloat(piece.style.top);
+            const targetX = pieceData.position.x;
+            const targetY = pieceData.position.y;
+            
+            const dx = currentX - targetX;
+            const dy = currentY - targetY;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            const snapThreshold = 5; 
+            
+            if (distance < snapThreshold && this.currentRotations[pieceId] === pieceData.correctRotation) {
+                piece.style.left = `${targetX}%`;
+                piece.style.top = `${targetY}%`;
+                piece.classList.add('snapped', 'correct-flash');
+                setTimeout(() => piece.classList.remove('correct-flash'), 800);
+                if (this.soundEnabled) this.sounds.snap.play();
+                this.checkCompletion();
+            }
+        },
+        
+        getPieceData: id => game.pieces.find(p => p.id === id),
+        
+        checkCompletion() {
+            const snappedPieces = this.elements.board.querySelectorAll(".snapped");
+            if (snappedPieces.length === this.pieces.length) {
+                if (this.soundEnabled) this.sounds.correct.play();
+                
+                this.elements.completionModal.style.display = "flex";
+                setTimeout(() => { this.elements.completionModal.style.display = "none"; }, 4000); 
+            }
+        },
+
+        resetPuzzle() {
+            const boardPieces = this.elements.board.querySelectorAll('.puzzle-piece');
+            boardPieces.forEach(piece => this.returnPieceToContainer(piece));
+            this.elements.completionModal.style.display = "none";
+        },
+
+        toggleSound() {
+            this.soundEnabled = !this.soundEnabled;
+            this.elements.soundToggle.textContent = this.soundEnabled ? "Sound On" : "Sound Off";
+        },
+
+        showHint(e) {
+            const hintIndex = parseInt(e.target.dataset.hint) - 1;
+            this.elements.hintTitle.textContent = this.hints[hintIndex].title;
+            this.elements.hintBody.innerHTML = this.hints[hintIndex].content;
+            this.elements.hintModal.style.display = 'flex';
+        }
+    };
+
+    window.addEventListener('load', () => game.init());
+    </script>
+</body>
+</html>
