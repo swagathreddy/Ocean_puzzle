@@ -150,9 +150,8 @@
         .info-content { font-size: 12px; line-height: 1.4; }
 
         .control-buttons { display: flex; flex-direction: column; width: 100%; gap: 5px; margin-top: auto; }
-        .sound-btn, .reset-btn { padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; color: white; text-align: center; }
-        .sound-btn { background-color: #4a90e2; }
-        .reset-btn { background-color: #e74c3c; }
+        .reset-btn { padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; color: white; text-align: center; background-color: #e74c3c;}
+
 
         /* Pieces Container */
         .pieces-container-wrapper {
@@ -193,38 +192,28 @@
             height: auto;
             background: none !important;
             cursor: pointer;
-            z-index: 5; /* Pieces are above dashboard, below lines */
+            z-index: 2;
         }
 
         .dashboard .puzzle-piece.dragging {
              opacity: 0.8;
              transform-origin: center center;
-             z-index: 1000; /* Dragged piece is on top of everything */
+             z-index: 1000;
         }
         
         .dashboard .puzzle-piece.snapped {
-             pointer-events: none; /* Lock piece in place */
-             z-index: 4; /* Snapped pieces go behind lines */
+             pointer-events: none;
+             z-index: 1;
         }
 
         .correct-flash {
-            animation: flash-green 4s ease-out;
+            animation: flash-green 1.5s ease-out;
         }
         @keyframes flash-green {
             0% { box-shadow: 0 0 25px 15px rgba(76, 175, 80, 0.7); }
             100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
         }
         
-        .latitude-line {
-            position: absolute;
-            width: 100%;
-            left: 0;
-            border-top: 2px dashed rgba(255, 255, 255, 0.6);
-            z-index: 10; /* Above pieces, below dragged piece */
-            pointer-events: none; /* Allow clicks to pass through */
-        }
-        
-
         .reference-image-container {
             margin-top: 10px;
         }
@@ -267,7 +256,7 @@
             .latitude-column {
                 flex-basis: 20%;
                 position: relative; 
-                justify-content: initial; /* Turn off auto-spacing */
+                justify-content: initial;
                 padding: 0 5px 0 0;
             }
 
@@ -277,15 +266,14 @@
                 right: 5px;
                 font-size: 8px; 
                 line-height: 1.2;
-                transform: translateY(-50%); /* Center text vertically on the line */
+                transform: translateY(-50%);
             }
 
-            /* Corrected vertical positions for each label */
-            .latitude-label:nth-child(1) { top: 12%; } /* Arctic Circle */
-            .latitude-label:nth-child(2) { top: 25%; } /* Tropic of Cancer */
-            .latitude-label:nth-child(3) { top: 36%; }    /* Equator */
-            .latitude-label:nth-child(4) { top: 48%; } /* Tropic of Capricorn */
-            .latitude-label:nth-child(5) { top: 62%; } /* Antarctic Circle */
+            .latitude-label:nth-child(1) { top: 15.2%; }
+            .latitude-label:nth-child(2) { top: 38.4%; }
+            .latitude-label:nth-child(3) { top: 50%; }
+            .latitude-label:nth-child(4) { top: 61.6%; }
+            .latitude-label:nth-child(5) { top: 83.3%; }
 
             .dashboard-area {
                 flex-basis: 80%; 
@@ -314,8 +302,6 @@
                 </div>
                 <div class="dashboard-area">
                     <div class="dashboard" id="puzzleBoard">
-                        <div class="latitude-line tropic-cancer"></div>
-                        <div class="latitude-line tropic-capricorn"></div>
                     </div>
                     <div class="hint-buttons">
                         <button class="hint-button" data-hint="1">HINT 1</button>
@@ -341,10 +327,9 @@
                     <div class="info-content"><b>Drag</b> pieces to the map. Once on the map, <b>tap a piece to rotate it</b>. Get it close to the right spot and it will snap into place!</div>
                 </div>
                 <div class="reference-image-container">
-                    <img src="Main.png"Reference Map" id="refImage">
+                    <img src="./Main.png" alt="Reference Map" id="refImage">
                 </div>
                 <div class="control-buttons">
-                    <button class="sound-btn" id="soundToggle">Sound On</button>
                     <button class="reset-btn" id="resetBtn">Reset Puzzle</button>
                 </div>
             </div>
@@ -386,17 +371,17 @@
     <script>
     const game = {
         pieces: [
-             { id: "arctic", name: "Arctic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/ARCTIC.png", position: { x: 0.4, y: 0 }, size: { width: 99.1, height: 29.5 }, correctRotation: 0 },
-             { id: "northPacific", name: "North Pacific Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20PACIFIC.png", position: { x: 0, y: 16.2 }, size: { width: 16.8, height: 32.9 }, correctRotation: 0 },
-             { id: "northPacific2", name: "North Pacific Ocean 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20PACIFIC%202.png", position: { x: 78.0, y: 15.2 }, size: { width: 21.6, height: 24.9 }, correctRotation: 0 },
-             { id: "tropicalPacific1", name: "Tropical Pacific 1", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20PACIFIC%201.png", position: { x: 0, y: 35.2 }, size: { width: 27.0, height: 29.5 }, correctRotation: 0 },
-             { id: "tropicalPacific2", name: "Tropical Pacific 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20PACIFIC%202.png", position: { x: 73.1, y: 36.1 }, size: { width: 26.3, height: 26.0 }, correctRotation: 0 },
-             { id: "southPacific", name: "South Pacific Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20PACIFIC.png", position: { x: 0, y: 49.6 }, size: { width: 28.4, height: 34.2 }, correctRotation: 0 },
-             { id: "southPacific2", name: "South Pacific Ocean 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20PACIFIC%202.png", position: { x: 84.1, y: 60.3 }, size: { width: 15.4, height: 21.1 }, correctRotation: 0 },
-             { id: "northAtlantic", name: "North Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20ATLANTIC.png", position: { x: 25.6, y: 8.4 }, size: { width: 38.4, height: 33.1 }, correctRotation: 0 },
-             { id: "tropicalAtlantic", name: "Tropical Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20ATLANTIC.png", position: { x: 20.3, y: 32.7 }, size: { width: 31.1, height: 29.7 }, correctRotation: 0 },
-             { id: "southAtlantic", name: "South Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20ATLANTIC.png", position: { x: 27.4, y: 54.2 }, size: { width: 25.6, height: 24.9 }, correctRotation: 0 },
-             { id: "indianOcean", name: "Indian Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/INDIAN%20OCEAN.png", position: { x: 53.0, y: 35.0 }, size: { width: 32.1, height: 43.2 }, correctRotation: 0 },
+             { id: "arctic", name: "Arctic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/ARCTIC.png", position: { x: 0.4, y: 1 }, size: { width: 99.1, height: 29.5 }, correctRotation: 0 },
+             { id: "northPacific", name: "North Pacific Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20PACIFIC.png", position: { x: 0.7, y: 16.2 }, size: { width: 16.8, height: 32.9 }, correctRotation: 0 },
+             { id: "northPacific2", name: "North Pacific Ocean 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20PACIFIC%202.png", position: { x: 78.0, y: 18.2 }, size: { width: 21.6, height: 24.9 }, correctRotation: 0 },
+             { id: "tropicalPacific1", name: "Tropical Pacific 1", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20PACIFIC%201.png", position: { x: 0.7, y: 36.5 }, size: { width: 27.0, height: 29.5 }, correctRotation: 0 },
+             { id: "tropicalPacific2", name: "Tropical Pacific 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20PACIFIC%202.png", position: { x: 73.1, y: 39.1 }, size: { width: 26.3, height: 26.0 }, correctRotation: 0 },
+             { id: "southPacific", name: "South Pacific Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20PACIFIC.png", position: { x: 0.7, y: 52.3 }, size: { width: 28.4, height: 34.2 }, correctRotation: 0 },
+             { id: "southPacific2", name: "South Pacific Ocean 2", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20PACIFIC%202.png", position: { x: 84.1, y: 64.3 }, size: { width: 15.4, height: 21.1 }, correctRotation: 0 },
+             { id: "northAtlantic", name: "North Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/NORTH%20ATLANTIC.png", position: { x: 25.6, y: 10 }, size: { width: 38.4, height: 33.1 }, correctRotation: 0 },
+             { id: "tropicalAtlantic", name: "Tropical Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/TROPICAL%20ATLANTIC.png", position: { x: 20.3, y: 34.5 }, size: { width: 31.1, height: 29.7 }, correctRotation: 0 },
+             { id: "southAtlantic", name: "South Atlantic Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTH%20ATLANTIC.png", position: { x: 28, y: 57.2 }, size: { width: 25.6, height: 24.9 }, correctRotation: 0 },
+             { id: "indianOcean", name: "Indian Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/INDIAN%20OCEAN.png", position: { x: 53.4, y: 38.4 }, size: { width: 32.1, height: 43.2 }, correctRotation: 0 },
              { id: "southernOcean", name: "Southern Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTHERN%20OCEAN.png", position: { x: 0.4, y: 78.3 }, size: { width: 99.0, height: 21.5 }, correctRotation: 0 }
         ],
         hints: [
@@ -407,30 +392,22 @@
             { title: "HINT 5", content: "Leatherback turtles travel across the vast Pacific. Connect their paths, remembering the Pacific is on both sides of a 2D map!" },
             { title: "HINT 6", content: "As you place the ocean pieces, the empty spaces will form the continents. Use your knowledge of world geography to guide you!" }
         ],
-        soundEnabled: true,
         currentRotations: {},
         draggedPiece: null,
         dragOffset: { x: 0, y: 0 },
         isDragging: false,
-        sounds: {
-            correct: new Audio("https://assets.mixkit.co/sfx/preview/mixkit-game-success-tone-2867.mp3"),
-            snap: new Audio("https://assets.mixkit.co/sfx/preview/mixkit-short-put-down-2put-down-2-2059.mp3"),
-            rotate: new Audio("https://assets.mixkit.co/sfx/preview/mixkit-tick-in-a-game-interface-1087.mp3")
-        },
 
         init() {
             this.setupDOM();
             this.createPieces();
             this.setupEventListeners();
             this.resetRotations();
-            Object.values(this.sounds).forEach(sound => sound.volume = 0.6);
         },
 
         setupDOM() {
             this.elements = {
                 board: document.getElementById("puzzleBoard"),
                 piecesContainer: document.getElementById("piecesContainer"),
-                soundToggle: document.getElementById("soundToggle"),
                 resetBtn: document.getElementById("resetBtn"),
                 hintModal: document.getElementById('hintModal'),
                 hintTitle: document.getElementById('hintTitle'),
@@ -462,7 +439,6 @@
         },
 
         setupEventListeners() {
-            this.elements.soundToggle.addEventListener("click", () => this.toggleSound());
             this.elements.resetBtn.addEventListener("click", () => this.resetPuzzle());
             this.elements.playAgainBtn.addEventListener("click", () => this.resetPuzzle());
             document.querySelectorAll('.hint-button').forEach(btn => btn.addEventListener('click', (e) => this.showHint(e)));
@@ -562,7 +538,6 @@
             const pieceId = piece.dataset.id;
             this.currentRotations[pieceId] = (this.currentRotations[pieceId] + 90) % 360;
             piece.style.transform = `rotate(${this.currentRotations[pieceId]}deg)`;
-            if(this.soundEnabled) this.sounds.rotate.play();
             this.snapPiece(piece);
         },
 
@@ -583,8 +558,7 @@
                 piece.style.left = `${targetX}%`;
                 piece.style.top = `${targetY}%`;
                 piece.classList.add('snapped', 'correct-flash');
-                setTimeout(() => piece.classList.remove('correct-flash'), 800);
-                if (this.soundEnabled) this.sounds.snap.play();
+                setTimeout(() => piece.classList.remove('correct-flash'), 1500); 
                 this.checkCompletion();
             }
         },
@@ -594,8 +568,6 @@
         checkCompletion() {
             const snappedPieces = this.elements.board.querySelectorAll(".snapped");
             if (snappedPieces.length === this.pieces.length) {
-                if (this.soundEnabled) this.sounds.correct.play();
-                
                 this.elements.completionModal.style.display = "flex";
                 setTimeout(() => { this.elements.completionModal.style.display = "none"; }, 4000); 
             }
@@ -605,11 +577,6 @@
             const boardPieces = this.elements.board.querySelectorAll('.puzzle-piece');
             boardPieces.forEach(piece => this.returnPieceToContainer(piece));
             this.elements.completionModal.style.display = "none";
-        },
-
-        toggleSound() {
-            this.soundEnabled = !this.soundEnabled;
-            this.elements.soundToggle.textContent = this.soundEnabled ? "Sound On" : "Sound Off";
         },
 
         showHint(e) {
