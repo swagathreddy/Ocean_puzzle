@@ -87,20 +87,32 @@
             display: flex;
         }
 
-        .latitude-column {
+         .latitude-column {
             flex-basis: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
+            position: relative; /* Use as positioning context */
             padding-right: 10px;
             text-align: right;
         }
 
+
+        
         .latitude-label {
             color: #1a365d;
             font-weight: bold;
-            font-size: clamp(8px, 2.5vw, 12px); /* Responsive font size */
+            font-size: clamp(8px, 2.5vw, 12px);
+            position: absolute;
+            width: 100%;
+            right: 10px;
+            transform: translateY(-50%);
+            line-height: 1.2;
         }
+
+        /* Base positions for labels (for desktop) */
+        .latitude-label:nth-child(1) { top: 14.4%; }
+        .latitude-label:nth-child(2) { top: 33.6%; }
+        .latitude-label:nth-child(3) { top: 42%; }
+        .latitude-label:nth-child(4) { top: 52.6%; }
+        .latitude-label:nth-child(5) { top: 72.3%; }
 
         .dashboard-area {
             flex: 1; /* Takes remaining space in game-area */
@@ -116,6 +128,31 @@
             border-radius: 5px;
             position: relative;
         }
+
+        .latitude-lines-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none; 
+        }
+
+        .latitude-lines-overlay .line {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            border-top: 2px dashed rgba(255, 255, 255, 0.7);
+            box-sizing: border-box;
+        }
+        
+        .latitude-lines-overlay .line:nth-child(1) { top: 18.4%; }
+        .latitude-lines-overlay .line:nth-child(2) { top: 41.6%; }
+        .latitude-lines-overlay .line:nth-child(3) { top: 50%; }  
+        .latitude-lines-overlay .line:nth-child(4) { top: 58.6%; }
+        .latitude-lines-overlay .line:nth-child(5) { top: 82.3%; }
+ 
 
         /* Hint Buttons */
         .hint-buttons {
@@ -144,12 +181,11 @@
             gap: 10px;
         }
 
-        .info-panel, .clues-panel { background-color: white; border-radius: 10px; padding: 10px; }
+        .info-panel, .clues-panel { background-color: white; border-radius: 10px; padding: 10px; display: flex; align-items: flex-start;}
         .info-number { width: 25px; height: 25px; border-radius: 50%; background-color: #ff9090; color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 10px; flex-shrink: 0; }
-        .info-number.orange { background-color: #ffaa50; }
         .info-content { font-size: 12px; line-height: 1.4; }
         
-        /* New Clues Panel Styling */
+        .clues-panel { display: block; } 
         .clues-panel h3 { font-size: 14px; margin-bottom: 8px; color: #1a365d;}
         .clues-panel ul { list-style: none; padding-left: 5px; }
         .clues-panel li { font-size: 11px; margin-bottom: 5px; display: flex; align-items: center; }
@@ -181,7 +217,7 @@
             height: 45px;
             cursor: grab;
             touch-action: none;
-            transition: transform 0.2s; /* Smooth rotation */
+            transition: transform 0.2s;
         }
         .puzzle-piece.dragging { cursor: grabbing; }
 
@@ -192,7 +228,6 @@
             pointer-events: none;
         }
 
-        /* Pieces on the dashboard */
         .dashboard .puzzle-piece {
             position: absolute !important;
             width: auto;
@@ -221,9 +256,7 @@
             100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
         }
         
-        .reference-image-container {
-            margin-top: 10px;
-        }
+        .reference-image-container { margin-top: 10px; }
         .reference-image-container img {
             width: 100%;
             border-radius: 5px;
@@ -231,27 +264,112 @@
             cursor: pointer;
         }
         
-        /* References section */
         .references-section { margin-top: 20px; width: 100%; text-align: center;}
         .references-title { font-weight: bold; margin-bottom: 5px; }
         .references-content { font-size: 12px; font-style: italic; text-align: left; }
 
-        /* Modals */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 20px 30px; border-radius: 15px; text-align: center; max-width: 90%; animation: modalAppear 0.3s ease-out; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        /* --- MODAL STYLES --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center; padding: 20px;}
         @keyframes modalAppear { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal-content h2 { color: #2d4a8c; font-size: 28px; margin-bottom: 20px; }
-        .modal-content p { color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 25px; }
-        .modal-content button { background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease; }
-        .modal-content button:hover { background: #45a049; }
 
-        .hint-modal .modal-content, .ref-modal .modal-content { width: auto; max-width: 600px; }
-        .hint-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; text-align: center; }
-        .hint-body { font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
-        .close-button { display: block; margin: 0 auto; padding: 8px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        /* Generic modal content for hint/ref popups */
+        .modal-content { background: white; padding: 20px 30px; border-radius: 15px; text-align: center; max-width: 90%; animation: modalAppear 0.3s ease-out; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-content h3 { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+        .modal-content p { font-size: 14px; line-height: 1.5; margin-bottom: 20px; text-align: left; }
+        .modal-content button.close-button { display: block; margin: 10px auto 0; padding: 8px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .ref-modal .modal-content { width: auto; max-width: 600px; }
         .ref-modal img { max-width: 100%; height: auto; }
 
-        /* =========== MOBILE-ONLY STYLES =========== */
+        /* --- NEW: END GAME MODAL LAYOUT --- */
+        .end-game-layout {
+            position: relative; /* Needed for positioning the close button */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, auto);
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            animation: modalAppear 0.4s ease-out;
+        }
+
+        /* NEW: Close button for end-game modal */
+        .end-game-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            color: #555;
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+            padding: 0;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+        .end-game-close-btn:hover {
+            background-color: #e74c3c;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .congrats-message {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            background-color: #e3f2fd;
+            border: 2px solid #90caf9;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .congrats-message h2 { color: #1976d2; font-size: 2em; margin-bottom: 15px; }
+        .congrats-message p { color: #424242; font-size: 1em; text-align: center; margin-bottom: 20px; }
+        .congrats-message button { background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease; }
+        .congrats-message button:hover { background: #45a049; }
+
+        .hint-item {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #c8e6c9;
+        }
+        .hint-item h3 { color: #2e7d32; font-size: 1.1em; margin-bottom: 8px; border-bottom: 1px solid #a5d6a7; padding-bottom: 5px;}
+        .hint-item p { color: #333; font-size: 0.9em; line-height: 1.5; margin: 0; }
+
+        .hint-1 { grid-area: 1 / 1; }
+        .hint-2 { grid-area: 1 / 2; }
+        .hint-3 { grid-area: 1 / 3; }
+        .hint-4 { grid-area: 2 / 1; }
+        .hint-5 { grid-area: 2 / 3; }
+        .hint-6 { grid-area: 3 / 2; }
+
+
+        /* =========== MOBILE & RESPONSIVE STYLES =========== */
+        @media (max-width: 900px) {
+             /* Switch End Game Modal to vertical layout */
+            .end-game-layout {
+                display: flex;
+                flex-direction: column;
+                max-width: 500px;
+                max-height: 90vh;
+                overflow-y: auto;
+                padding-top: 45px; /* Add padding to avoid overlap with close button */
+            }
+            .congrats-message { order: 1; }
+            .hint-item { order: 2; }
+        }
+
         @media (max-width: 850px) {
             .main-wrapper { flex-direction: column; }
             .side-panel { order: 1; width: 100%; flex-direction: column; }
@@ -261,25 +379,18 @@
             
             .latitude-column {
                 flex-basis: 20%;
-                position: relative; 
-                justify-content: initial;
                 padding: 0 5px 0 0;
             }
 
             .latitude-label {
-                position: absolute; 
-                width: 100%;
                 right: 5px;
                 font-size: 8px; 
-                line-height: 1.2;
-                transform: translateY(-50%);
             }
-
-            .latitude-label:nth-child(1) { top: 15.2%; }
-            .latitude-label:nth-child(2) { top: 38.4%; }
-            .latitude-label:nth-child(3) { top: 50%; }
-            .latitude-label:nth-child(4) { top: 61.6%; }
-            .latitude-label:nth-child(5) { top: 83.3%; }
+            .latitude-label:nth-child(1) { top: 12.4%; }
+            .latitude-label:nth-child(2) { top: 27%; }
+            .latitude-label:nth-child(3) { top: 35.5%; }
+            .latitude-label:nth-child(4) { top: 46%; }
+            .latitude-label:nth-child(5) { top: 62%; }
 
             .dashboard-area {
                 flex-basis: 80%; 
@@ -308,6 +419,13 @@
                 </div>
                 <div class="dashboard-area">
                     <div class="dashboard" id="puzzleBoard">
+                         <div class="latitude-lines-overlay">
+                            <div class="line"></div>
+                            <div class="line"></div>
+                            <div class="line"></div>
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </div>
                     </div>
                     <div class="hint-buttons">
                         <button class="hint-button" data-hint="1">HINT 1</button>
@@ -322,19 +440,23 @@
             <div class="side-panel">
                 <div class="info-panel">
                     <div class="info-number">1</div>
-                    <div class="info-content">An illustration showing all the ocean pieces in their correct places is displayed on the side, which you can use as a reference for joining your pieces.</div>
+                    <div class="info-content">There are 12 ocean-shaped pieces (not continents!). The puzzle includes pieces for the Arctic, Southern, Indian, Atlantic (3), and Pacific (6) oceans.</div>
                 </div>
                 <div class="info-panel">
                     <div class="info-number">2</div>
-                    <div class="info-content">When a piece is placed correctly on the map, it lights up and locks in place.</div>
+                    <div class="info-content">Drag the pieces to their correct positions on the 2D map. An illustration of the completed puzzle is available on your side for reference.</div>
+                </div>
+                 <div class="info-panel">
+                    <div class="info-number">3</div>
+                    <div class="info-content">When a piece is placed in the correct spot, it will light up and lock into place.</div>
                 </div>
                  <div class="clues-panel">
-                    <h3>Hint Clues to Watch for:</h3>
+                    <h3>Hints to Watch for:</h3>
                     <ul>
                         <li><img src="./whale.png" alt="Whale icon">Populations and migration routes of Humpback whales</li>
                         <li><img src="./arctic.png" alt="Tern icon">Arctic terns</li>
                         <li><img src="./turtle.png" alt="Turtle icon">Leatherback turtles</li>
-                        <li><img src="./conveyer.png" alt="Current icon">The Great Ocean Conveyor Belt</li>
+                        <li><img src="./conveyer.png" alt="Current icon">The Great Ocean Conveyor Belt, represented by blue and red lines with arrows across puzzle pieces.</li>
                     </ul>
                 </div>
                 <div class="reference-image-container">
@@ -355,18 +477,45 @@
             </div>
         </div>
         
-        <div class="modal completion-modal" id="completionModal">
-            <div class="modal-content">
-                <h2>Congratulations! 🎉</h2>
-                <p>You have successfully shown how all the oceans are connected!</p>
-                <button id="playAgainBtn">Play Again</button>
+        <div class="modal" id="endGameModal">
+            <div class="end-game-layout">
+                <button class="end-game-close-btn" id="endGameCloseBtn">&times;</button>
+                <div class="hint-item hint-1">
+                    <h3>HINT 1</h3>
+                    <p>The oceans are hottest at the equator (redder regions) and coolest near the poles (bluer regions). Match the puzzle piece colors to the dashboard background!</p>
+                </div>
+                <div class="hint-item hint-2">
+                    <h3>HINT 2</h3>
+                    <p>The Global Conveyor Belt is the longest deep-sea current that connects all oceans. Connect the red (warm) and blue (cold) lines to form the current.</p>
+                </div>
+                <div class="hint-item hint-3">
+                    <h3>HINT 3</h3>
+                    <p>Humpback whales migrate from polar feeding grounds in the summer to equatorial breeding grounds in the winter. Follow their path on the pieces!</p>
+                </div>
+                <div class="hint-item hint-4">
+                    <h3>HINT 4</h3>
+                    <p>Arctic Terns make the longest migration, traveling from the Arctic all the way to the Antarctic and back. Connect their flight path across the globe!</p>
+                </div>
+                <div class="congrats-message">
+                    <h2>Congratulations! 🎉</h2>
+                    <p>You have completed the puzzle. You can now see how the Great Ocean Conveyor Belt and major migration routes connect our One Ocean!</p>
+                    <button id="playAgainBtn">Play Again</button>
+                </div>
+                <div class="hint-item hint-5">
+                    <h3>HINT 5</h3>
+                    <p>Leatherback turtles travel across the vast Pacific Ocean between foraging grounds. Connect their paths, remembering the Pacific is on both sides of a 2D map!</p>
+                </div>
+                <div class="hint-item hint-6">
+                    <h3>HINT 6</h3>
+                    <p>Bonus Clue: As you align the oceans, the shapes of the continents emerge in the negative space, helping you verify the piece placements!</p>
+                </div>
             </div>
         </div>
         
-        <div class="modal hint-modal" id="hintModal">
+        <div class="modal" id="hintModal">
             <div class="modal-content">
-                <div class="hint-title" id="hintTitle"></div>
-                <div class="hint-body" id="hintBody"></div>
+                <h3 id="hintTitle"></h3>
+                <p id="hintBody"></p>
                 <button class="close-button">Close</button>
             </div>
         </div>
@@ -396,12 +545,12 @@
              { id: "southernOcean", name: "Southern Ocean", image: "https://zooreach.org/downloads/1ocean_platform/p1_puzzle/SOUTHERN%20OCEAN.png", position: { x: 0.4, y: 78.3 }, size: { width: 99.0, height: 21.5 }, correctRotation: 0 }
         ],
         hints: [
-            { title: "HINT 1", content: "The oceans are hottest at the equator (redder regions) and coolest near the poles (bluer regions). Match the puzzle piece colors to the dashboard background!" },
-            { title: "HINT 2", content: "The Global Conveyor Belt is the longest deep-sea current that connects all oceans. Connect the red (warm) and blue (cold) lines to form the current." },
-            { title: "HINT 3", content: "Humpback whales migrate from polar feeding grounds in the summer to equatorial breeding grounds in the winter. Follow their path on the pieces!" },
-            { title: "HINT 4", content: "Arctic Terns make the longest migration, traveling from the Arctic all the way to the Antarctic and back. Connect their flight path across the globe!" },
-            { title: "HINT 5", content: "Leatherback turtles travel across the vast Pacific Ocean between foraging grounds. Connect their paths, remembering the Pacific is on both sides of a 2D map!" },
-            { title: "HINT 6", content: "Bonus Clue: As you start aligning the oceans correctly, you will notice that the shapes of the main continents slowly emerge in the background of the map. This will help you double-check the placement as the puzzle progresses!" }
+             { title: "HINT 1", content: "The oceans are hottest at the equator (redder regions) and coolest near the poles (bluer regions). Match the puzzle piece colors to the dashboard background!" },
+             { title: "HINT 2", content: "The Global Conveyor Belt is the longest deep-sea current that connects all oceans. Connect the red (warm) and blue (cold) lines to form the current." },
+             { title: "HINT 3", content: "Humpback whales migrate from polar feeding grounds in the summer to equatorial breeding grounds in the winter. Follow their path on the pieces!" },
+             { title: "HINT 4", content: "Arctic Terns make the longest migration, traveling from the Arctic all the way to the Antarctic and back. Connect their flight path across the globe!" },
+             { title: "HINT 5", content: "Leatherback turtles travel across the vast Pacific Ocean between foraging grounds. Connect their paths, remembering the Pacific is on both sides of a 2D map!" },
+             { title: "HINT 6", content: "Bonus Clue: As you start aligning the oceans correctly, you will notice that the shapes of the main continents slowly emerge in the background of the map. This will help you double-check the placement as the puzzle progresses!" }
         ],
         currentRotations: {},
         draggedPiece: null,
@@ -423,7 +572,8 @@
                 hintModal: document.getElementById('hintModal'),
                 hintTitle: document.getElementById('hintTitle'),
                 hintBody: document.getElementById('hintBody'),
-                completionModal: document.getElementById("completionModal"),
+                endGameModal: document.getElementById("endGameModal"),
+                endGameCloseBtn: document.getElementById("endGameCloseBtn"),
                 playAgainBtn: document.getElementById("playAgainBtn"),
                 refImage: document.getElementById("refImage"),
                 refModal: document.getElementById("refModal"),
@@ -454,6 +604,10 @@
             this.elements.playAgainBtn.addEventListener("click", () => this.resetPuzzle());
             document.querySelectorAll('.hint-button').forEach(btn => btn.addEventListener('click', (e) => this.showHint(e)));
             
+            this.elements.endGameCloseBtn?.addEventListener('click', () => {
+                this.elements.endGameModal.style.display = 'none';
+            });
+
             document.querySelectorAll('.close-button').forEach(btn => btn.addEventListener('click', () => {
                 this.elements.hintModal.style.display = 'none';
                 this.elements.refModal.style.display = 'none';
@@ -512,19 +666,15 @@
 
         dragEnd(e) {
             if (!this.draggedPiece) return;
-
             const boardRect = this.elements.board.getBoundingClientRect();
             const eventPos = e.changedTouches ? e.changedTouches[0] : e;
-            
             const isOutside = eventPos.clientX < boardRect.left || eventPos.clientX > boardRect.right ||
-                              eventPos.clientY < boardRect.top || eventPos.clientY > boardRect.bottom;
-            
+                                eventPos.clientY < boardRect.top || eventPos.clientY > boardRect.bottom;
             if (isOutside) {
                 this.returnPieceToContainer(this.draggedPiece);
             } else {
                 this.snapPiece(this.draggedPiece);
             }
-            
             this.draggedPiece.classList.remove('dragging');
             this.draggedPiece = null;
             setTimeout(() => { this.isDragging = false; }, 50);
@@ -559,12 +709,10 @@
             const currentY = parseFloat(piece.style.top);
             const targetX = pieceData.position.x;
             const targetY = pieceData.position.y;
-            
             const dx = currentX - targetX;
             const dy = currentY - targetY;
             const distance = Math.sqrt(dx*dx + dy*dy);
             const snapThreshold = 5; 
-            
             if (distance < snapThreshold && this.currentRotations[pieceId] === pieceData.correctRotation) {
                 piece.style.left = `${targetX}%`;
                 piece.style.top = `${targetY}%`;
@@ -579,21 +727,23 @@
         checkCompletion() {
             const snappedPieces = this.elements.board.querySelectorAll(".snapped");
             if (snappedPieces.length === this.pieces.length) {
-                this.elements.completionModal.style.display = "flex";
-                setTimeout(() => { this.elements.completionModal.style.display = "none"; }, 4000); 
+                this.elements.endGameModal.style.display = "flex";
             }
         },
 
         resetPuzzle() {
             const boardPieces = this.elements.board.querySelectorAll('.puzzle-piece');
-            boardPieces.forEach(piece => this.returnPieceToContainer(piece));
-            this.elements.completionModal.style.display = "none";
+            boardPieces.forEach(piece => {
+                piece.classList.remove('snapped');
+                this.returnPieceToContainer(piece)
+            });
+            this.elements.endGameModal.style.display = "none";
         },
 
         showHint(e) {
             const hintIndex = parseInt(e.target.dataset.hint) - 1;
             this.elements.hintTitle.textContent = this.hints[hintIndex].title;
-            this.elements.hintBody.innerHTML = this.hints[hintIndex].content;
+            this.elements.hintBody.textContent = this.hints[hintIndex].content;
             this.elements.hintModal.style.display = 'flex';
         }
     };
